@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Web Serial API Console</title>
+    <script>
+        async function uploadBtn() {
+            var file = document.getElementById('file').files[0];
+
+            function binFileLoad(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        resolve(reader.result);
+                    }
+                    reader.readAsBinaryString(file);
+                })
+            }
+
+            async function binLoad() {
+                let fileBin = await binFileLoad(file);
+                var textarea = document.getElementById('outputArea');
+                textarea.value = btoa(fileBin);
+            }
+
+            binLoad();
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Upload to Base64</h1>
+
+    <input type="file" id="file" />
+    <br />
+    <br />
+
+    <input type="button" value="Upload" onclick="uploadBtn();" />
+    <br />
+    <textarea cols="90" rows="6" id="outputArea" readonly></textarea>
+</body>
+
+</html>
