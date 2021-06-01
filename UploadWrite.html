@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Web Serial API Console</title>
+    <script type="text/javascript" src="espserial.js"></script>
+    <script>
+        async function onSelectButtonClick() {
+            await espSelectPort();
+        }
+
+        async function onConnectButtonClick() {
+            try {
+                const baudRate = Number(document.getElementById('baudRate').value);
+                espSetOutput(addSerial);
+                await espConnect(baudRate);
+            } catch (error) {
+                addSerial("Error: Open" + error + "\n");
+            }
+        }
+
+        function addSerial(msg) {
+            var textarea = document.getElementById('outputArea');
+            textarea.value += msg;
+            textarea.scrollTop = textarea.scrollHeight;
+        }
+
+        function clearSerial() {
+            document.getElementById('outputArea').value = "";
+        }
+
+        function writeBtn() {
+            var reg = document.getElementById('writereg').value;
+            var file = document.getElementById('file').files[0];
+            var reg2 = document.getElementById('writereg2').value;
+            var file2 = document.getElementById('file2').files[0];
+            var reg3 = document.getElementById('writereg3').value;
+            var file3 = document.getElementById('file3').files[0];
+            var reg4 = document.getElementById('writereg4').value;
+            var file4 = document.getElementById('file4').files[0];
+            var reg5 = document.getElementById('writereg5').value;
+            var file5 = document.getElementById('file5').files[0];
+
+            function binFileLoad(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                        resolve(reader.result);
+                    }
+                    reader.readAsBinaryString(file);
+                })
+            }
+
+            async function binLoad() {
+                let fileBin = [];
+                let fileReg = [];
+
+                if (file) {
+                    fileBin[0] = await binFileLoad(file);
+                    fileReg[0] = parseInt(reg);
+                    if (file2) {
+                        fileBin[1] = await binFileLoad(file2);
+                        fileReg[1] = parseInt(reg2);
+                        if (file3) {
+                            fileBin[2] = await binFileLoad(file3);
+                            fileReg[2] = parseInt(reg3);
+                            if (file4) {
+                                fileBin[3] = await binFileLoad(file4);
+                                fileReg[3] = parseInt(reg4);
+                                if (file5) {
+                                    fileBin[4] = await binFileLoad(file5);
+                                    fileReg[4] = parseInt(reg5);
+                                }
+                            }
+                        }
+                    }
+                }
+
+                console.log("fileReg", fileReg);
+                for (let i = 0; i < fileBin.length; i++) {
+                    console.log("fileSize[" + i + "]", fileBin[i].length);
+                }
+                espFlash(fileBin, fileReg);
+            }
+
+            binLoad();
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Web Serial API esptool Writer</h1>
+
+    Update Baud Rate
+    <select id="baudRate">
+        <option value="115200">115200 bps</option>
+        <option value="230400">230400 bps</option>
+        <option value="250000">250000 bps</option>
+        <option value="500000">500000 bps</option>
+        <option value="750000" selected>750000 bps</option>
+        <option value="1000000">1000000 bps</option>
+        <option value="1500000">1500000 bps</option>
+        <option value="2000000">2000000 bps</option>
+    </select>
+    <input type="button" value="Connect" onclick="onConnectButtonClick();" />
+    <br />
+    <br />
+
+    <input type="text" id="writereg" value="0xe000" />
+    <input type="file" id="file" />
+    <br />
+    <input type="text" id="writereg2" value="0x1000" />
+    <input type="file" id="file2" />
+    <br />
+    <input type="text" id="writereg3" value="0x10000" />
+    <input type="file" id="file3" />
+    <br />
+    <input type="text" id="writereg4" value="0x8000" />
+    <input type="file" id="file4" />
+    <br />
+    <input type="text" id="writereg5" />
+    <input type="file" id="file5" />
+    <br />
+
+    <input type="button" value="Write" onclick="writeBtn();" />
+    <br />
+    <textarea cols="90" rows="6" id="outputArea" readonly></textarea>
+    <br />
+    <input type="button" value="Erase" onclick="espErase();" />
+</body>
+
+</html>
