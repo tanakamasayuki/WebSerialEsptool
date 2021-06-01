@@ -32,7 +32,7 @@
             espSetOutput(addSerial);
             await espConnect(750000);
             await binLoad();
-            await espDisconnect();
+            await espDisconnect(true);
         }
     </script>
 </head>

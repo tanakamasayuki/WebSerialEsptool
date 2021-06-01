@@ -86,7 +86,7 @@ async function espConnect(setBaudrate) {
     await espChangeBaudrate();
 }
 
-async function espDisconnect() {
+async function espDisconnect(reselect = false) {
     if (espPort.readable) {
         if (espReader) {
             await espReader.cancel();
@@ -97,6 +97,10 @@ async function espDisconnect() {
         espChipType = null;
         espMacAddr = null;
         espOutput("Serial Close\n");
+    }
+
+    if (reselect) {
+        espPort = null;
     }
 }
 
@@ -579,7 +583,7 @@ async function espErase() {
         const { value, done, error } = await espReceivePacket(10000);
 
         if (!done && !error) {
-            espOutput("Erase!");
+            espOutput("Erase!\n");
             return;
         }
     }
@@ -645,7 +649,7 @@ async function espFlash(binData = [], offset) {
             console.log("espFlash toOffset", toOffset);
             console.log("espFlash seq", seq);
             console.log("espFlash bin.length", length);
-        
+
             espOutput("Flash Write:" + (seq + 1) + "/" + blocks + "\n");
             await espFlashData(binData[i].substr(fromOffset, length), seq);
         }
