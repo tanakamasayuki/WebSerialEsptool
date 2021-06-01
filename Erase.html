@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Web Serial API Console</title>
+    <script type="text/javascript" src="espserial.js"></script>
+    <script>
+        function addSerial(msg) {
+            var textarea = document.getElementById('outputArea');
+            textarea.value += msg;
+            textarea.scrollTop = textarea.scrollHeight;
+        }
+
+        async function eraseBtn() {
+            try {
+                espSetOutput(addSerial);
+                await espConnect(115200);
+            } catch (error) {
+                addSerial("Error: Open" + error + "\n");
+            }
+
+            await espErase();
+        }
+    </script>
+</head>
+
+<body>
+    <h1>Web Serial API esptool Writer</h1>
+
+    <input type="button" value="Erase" onclick="eraseBtn();" />
+    <br />
+    <textarea cols="90" rows="6" id="outputArea" readonly></textarea>
+</body>
+
+</html>

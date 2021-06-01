@@ -7,11 +7,13 @@
     <title>Web Serial API Console</title>
     <script type="text/javascript" src="espserial.js"></script>
     <script>
-        async function onSelectButtonClick() {
-            await espSelectPort();
+        function addSerial(msg) {
+            var textarea = document.getElementById('outputArea');
+            textarea.value += msg;
+            textarea.scrollTop = textarea.scrollHeight;
         }
 
-        async function onConnectButtonClick() {
+        async function writeBtn() {
             try {
                 const baudRate = Number(document.getElementById('baudRate').value);
                 espSetOutput(addSerial);
@@ -19,19 +21,7 @@
             } catch (error) {
                 addSerial("Error: Open" + error + "\n");
             }
-        }
 
-        function addSerial(msg) {
-            var textarea = document.getElementById('outputArea');
-            textarea.value += msg;
-            textarea.scrollTop = textarea.scrollHeight;
-        }
-
-        function clearSerial() {
-            document.getElementById('outputArea').value = "";
-        }
-
-        function writeBtn() {
             var reg = document.getElementById('writereg').value;
             var file = document.getElementById('file').files[0];
             var reg2 = document.getElementById('writereg2').value;
@@ -104,7 +94,6 @@
         <option value="1500000">1500000 bps</option>
         <option value="2000000">2000000 bps</option>
     </select>
-    <input type="button" value="Connect" onclick="onConnectButtonClick();" />
     <br />
     <br />
 
@@ -123,12 +112,11 @@
     <input type="text" id="writereg5" />
     <input type="file" id="file5" />
     <br />
+    <br />
 
     <input type="button" value="Write" onclick="writeBtn();" />
     <br />
     <textarea cols="90" rows="6" id="outputArea" readonly></textarea>
-    <br />
-    <input type="button" value="Erase" onclick="espErase();" />
 </body>
 
 </html>
