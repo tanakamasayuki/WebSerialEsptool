@@ -72,10 +72,11 @@
                 for (let i = 0; i < fileBin.length; i++) {
                     console.log("fileSize[" + i + "]", fileBin[i].length);
                 }
-                espFlash(fileBin, fileReg);
+                await espFlash(fileBin, fileReg);
             }
 
-            binLoad();
+            await binLoad();
+            await espDisconnect();
         }
     </script>
 </head>
