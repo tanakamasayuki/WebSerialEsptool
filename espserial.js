@@ -68,12 +68,18 @@ async function espConnect(setBaudrate) {
     const { usbProductId, usbVendorId } = espPort.getInfo();
     espOutput("Connect VendorId=0x" + usbVendorId.toString(16) + " ProductId=0x" + usbProductId.toString(16) + "\n");
 
-    let ret = await espDownload();
-    if (!ret) {
-        return;
+    espOutput("Connecting...");
+    for (let i = 0; i < 10; i++) {
+        await espDownload();
+        let ret = await espSync();
+        if (ret) {
+            await espGetChipType();
+            if (espChipType) {
+                espOutput("Sync\n\n");
+                break;
+            }
+        }
     }
-
-    await espSync();
 
     await espGetChipType();
     espOutput("Chip: " + espChipType + "\n");
@@ -114,6 +120,13 @@ async function espReset() {
 
 async function _espDownload(longDelay = false) {
     // Reset + Download mode
+    if (longDelay) {
+        await espReset();
+        await new Promise(resolve => setTimeout(resolve, 500));
+        await espReset();
+        await new Promise(resolve => setTimeout(resolve, 500));
+    }
+
     await espPort.setSignals({ dataTerminalReady: false, requestToSend: true });
     await new Promise(resolve => setTimeout(resolve, 100));
     if (longDelay) {
@@ -289,6 +302,7 @@ async function espReceivePacket(timeOut = 200, replaceC0 = true) {
 async function espSync() {
     let data = new ArrayBuffer(36);
     let dv = new DataView(data);
+    let ret = false;
 
     // Data
     let index = 0;
@@ -309,7 +323,6 @@ async function espSync() {
     let packet = espMakePakcet(ESP_SYNC, data);
 
     // Retry
-    espOutput("Connecting...");
     for (let i = 0; i < 10; i++) {
         // Send
         await espSendPacket(packet);
@@ -319,7 +332,7 @@ async function espSync() {
 
         if (!done && value.length >= 12) {
             // Sync
-            espOutput("Sync\n\n");
+            ret = true;
             break;
         } else {
             espOutput(".");
@@ -339,6 +352,8 @@ async function espSync() {
 
     // Wait
     await new Promise(resolve => setTimeout(resolve, 1000));
+
+    return ret;
 }
 
 async function espReadRegister(reg) {
